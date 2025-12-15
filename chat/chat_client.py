@@ -97,9 +97,10 @@ def listen_for_messages(sock):
 def show_main_menu():
     print("\n--- 메뉴 ---")
     print("1. 맞춤법 검사")
-    print("2. 영어 단어 퀴즈 출제 (전체)")
-    print("3. 1:1 채팅")
-    print("4. 영어 선생님 채팅방 입장")
+    print("2. 영어 단어 퀴즈 출제")
+    print("3. 퀴즈 정답 도전")
+    print("4. 1:1 채팅")
+    print("5. 영어 선생님 채팅방 입장")
     print("-----------")
 
 def main():
@@ -172,10 +173,13 @@ def main():
                 quiz = input("전체에게 보낼 퀴즈를 입력하세요: ")
                 s.send(f"QUIZ :{quiz}\n".encode())
             elif msg == '3':
+                answer = input("퀴즈의 정답을 입력하세요: ")
+                s.send(f"QUIZ_ANSWER :{answer}\n".encode())
+            elif msg == '4':
                 target_id = input("메시지를 보낼 상대방의 ID를 입력하세요: ")
                 p_msg = input(f"{target_id}님에게 보낼 메시지: ")
                 s.send(f"P_MSG {target_id} :{p_msg}\n".encode())
-            elif msg == '4':
+            elif msg == '5':
                 s.send(f"JOIN_ROOM english_teacher_room\n".encode())
             else:
                 print("잘못된 메뉴 선택입니다. 메시지를 보내려면 메뉴를 선택하세요.")

@@ -116,6 +116,10 @@ def handle_quiz(cs, trailing):
     sender_id = get_user_id(cs)
     broadcast(f"MSG_RECV 퀴즈-{sender_id} :{trailing}\n", sender_socket=cs)
 
+def handle_quiz_answer(cs, trailing):
+    sender_id = get_user_id(cs)
+    broadcast(f"MSG_RECV 퀴즈정답-{sender_id} :{trailing}\n", sender_socket=cs)
+
 def handle_private_message(cs, params, trailing):
     sender_id = get_user_id(cs)
     target_id = params[0]
@@ -189,6 +193,8 @@ def handle_message(cs, msg):
         handle_spell_check(cs, trailing)
     elif command == 'QUIZ':
         handle_quiz(cs, trailing)
+    elif command == 'QUIZ_ANSWER':
+        handle_quiz_answer(cs, trailing)
     elif command == 'P_MSG':
         handle_private_message(cs, params, trailing)
     elif command == 'JOIN_ROOM':
