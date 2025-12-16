@@ -63,36 +63,31 @@ def run_spell_check_on_server(text):
     if not SPELL_CHECKER_LOADED or not word_set or not freq_map:
         return text # 검사기 비활성화 시 원문 반환
 
-    words_to_check = re.findall(r'\\b[a-zA-Z]+\\b', text)
-    misspelled = check_text(' '.join(words_to_check), word_set)
-    
-    if not misspelled:
-        return text
+    # re.sub와 콜백 함수를 사용하여 한 번에 모든 단어를 검사하고 수정합니다.
+    def replace_word(match):
+        original_word = match.group(0)
+        # 단어의 소문자 버전이 사전에 있는지 확인합니다.
+        if original_word.lower() in word_set:
+            return original_word # 올바른 단어이므로 그대로 반환합니다.
 
-    corrections = {}
-    for word in misspelled:
-        suggestions = get_suggestions(word, word_set, freq_map, limit=1)
-        if suggestions:
-            corrections[word] = suggestions[0]
+        # 철자가 틀린 단어이므로, 제안을 받습니다.
+        suggestions = get_suggestions(original_word.lower(), word_set, freq_map, limit=1)
+        if not suggestions:
+            return original_word # 제안이 없으면 그대로 반환합니다.
 
-    if not corrections:
-        return text
+        suggestion = suggestions[0]
+
+        # 원래 대소문자를 보존합니다.
+        if original_word.isupper():
+            return suggestion.upper()
+        if original_word.istitle():
+            return suggestion.title()
         
-    corrected_text = text
-    for bad_word, good_word in corrections.items():
-        pattern = r'\\b' + re.escape(bad_word) + r'\\b'
-        found_word = re.search(pattern, corrected_text, re.IGNORECASE)
-        if found_word:
-            original_casing = found_word.group(0)
-            if original_casing.isupper():
-                suggestion = good_word.upper()
-            elif original_casing.istitle():
-                suggestion = good_word.title()
-            else:
-                suggestion = good_word.lower()
-            corrected_text = re.sub(pattern, suggestion, corrected_text, count=1, flags=re.IGNORECASE)
+        # 일반적인 단어는 소문자로 반환합니다.
+        return suggestion.lower()
 
-    return corrected_text
+    # 정규식을 사용하여 텍스트의 모든 단어에 대해 replace_word 콜백을 실행합니다.
+    return re.sub(r'[a-zA-Z]+', replace_word, text)
 
 # --- Command Handlers ---
 
